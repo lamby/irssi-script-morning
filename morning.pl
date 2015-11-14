@@ -17,6 +17,12 @@ my $VERSION = "0.1";
 );
 
 sub tick {
+	if (Irssi::settings_get_bool('morning_skip')) {
+		Irssi::print("morning: skipping this announcement");
+		Irssi::settings_set_bool('morning_skip', 0);
+		return;
+	}
+
 	POSIX::strftime("%H:%M", localtime) eq
 		Irssi::settings_get_str('morning_time') or return;
 
@@ -31,5 +37,6 @@ Irssi::settings_add_str($IRSSI{'name'}, 'morning_msg', 'morning');
 Irssi::settings_add_str($IRSSI{'name'}, 'morning_time', '08:00');
 Irssi::settings_add_str($IRSSI{'name'}, 'morning_chatnet', 'freenode');
 Irssi::settings_add_str($IRSSI{'name'}, 'morning_target', '#morning-test');
+Irssi::settings_add_bool($IRSSI{'name'}, 'morning_skip', 0);
 
 Irssi::timeout_add(60 * 1000, 'tick', undef);
