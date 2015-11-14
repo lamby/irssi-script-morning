@@ -29,14 +29,24 @@ sub tick {
 	my $server = Irssi::server_find_chatnet(
 		Irssi::settings_get_str('morning_chatnet')) or return;
 
-	$server->command('msg ' . Irssi::settings_get_str('morning_target')
-		. ' ' . Irssi::settings_get_str('morning_msg'));
+	my $min = Irssi::settings_get_int('morning_delay_min');
+	my $max = Irssi::settings_get_int('morning_delay_max');
+	my $delay = $min + int(rand($max - $min));
+
+	Irssi::print("morning: will announce in $delay seconds");
+
+	Irssi::timeout_add_once(($delay * 1000) + 10, sub {
+		$server->command('msg ' . Irssi::settings_get_str('morning_target')
+			. ' ' . Irssi::settings_get_str('morning_msg'));
+	}, undef);
 }
 
 Irssi::settings_add_str($IRSSI{'name'}, 'morning_msg', 'morning');
 Irssi::settings_add_str($IRSSI{'name'}, 'morning_time', '08:00');
 Irssi::settings_add_str($IRSSI{'name'}, 'morning_chatnet', 'freenode');
 Irssi::settings_add_str($IRSSI{'name'}, 'morning_target', '#morning-test');
+Irssi::settings_add_int($IRSSI{'name'}, 'morning_delay_min', 0);
+Irssi::settings_add_int($IRSSI{'name'}, 'morning_delay_max', 0);
 Irssi::settings_add_bool($IRSSI{'name'}, 'morning_skip', 0);
 
 Irssi::timeout_add(60 * 1000, 'tick', undef);
